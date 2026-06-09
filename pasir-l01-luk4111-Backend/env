@@ -1,9 +1,0 @@
-# Name for the Docker Compose project
-COMPOSE_PROJECT_NAME=java-spring-k05-zl
-# MySQL environment variables
-MYSQL_CONTAINER_NAME=mysql-k05-zl
-MYSQL_ROOT_PASSWORD=student1
-MYSQL_DATABASE=zajac_lukasz_k05_spring
-MYSQL_USER=user-zl
-MYSQL_PASSWORD=student1
-TZ=Europe/Warsaw
