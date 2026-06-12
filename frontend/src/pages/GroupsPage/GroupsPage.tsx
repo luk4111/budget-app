@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, KeyboardEvent } from "react";
 import { groupsApi } from "../../api/groupsApi";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Group.module.scss";
@@ -64,60 +64,70 @@ const GroupsPage: React.FC = () => {
     }
   };
 
+  const handleGroupKeyDown = (e: KeyboardEvent<HTMLLIElement>, group: Group) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setSelectedGroup(group);
+    }
+  };
+
   return (
-    <div className={styles.container}>
-      <h2>Twoje Grupy</h2>
+      <div className={styles.container}>
+        <h2>Twoje Grupy</h2>
 
-      <div className={styles.form}>
-        <input
-          type="text"
-          placeholder="Nazwa grupy"
-          value={newGroupName}
-          onChange={(e) => setNewGroupName(e.target.value)}
+        <div className={styles.form}>
+          <input
+              type="text"
+              placeholder="Nazwa grupy"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+          />
+          <button onClick={handleCreateGroup}>Utwórz Grupę</button>
+        </div>
+
+        <ul className={styles.list}>
+          {groups.map((group) => (
+              <li
+                  key={group.id}
+                  onClick={() => setSelectedGroup(group)}
+                  onKeyDown={(e) => handleGroupKeyDown(e, group)}
+                  role="button"
+                  tabIndex={0}
+                  className={styles.groupItem}
+              >
+                {group.name}
+                {String(user?.id) === String(group.ownerId) && (
+                    <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setGroupToDelete(group);
+                        }}
+                        className={styles.deleteButton}
+                    >
+                      Usuń
+                    </button>
+                )}
+              </li>
+          ))}
+        </ul>
+
+        {selectedGroup && (
+            <GroupMembersPage
+                key={String(selectedGroup.id)}
+                group={selectedGroup}
+                onBack={() => setSelectedGroup(null)}
+            />
+        )}
+
+        <ConfirmModal
+            visible={Boolean(groupToDelete)}
+            title="Usuń grupę"
+            message="Czy na pewno chcesz usunąć tę grupę wraz z powiązanymi danymi?"
+            confirmLabel="Usuń"
+            onConfirm={handleDeleteGroup}
+            onCancel={() => setGroupToDelete(null)}
         />
-        <button onClick={handleCreateGroup}>Utwórz Grupę</button>
       </div>
-
-      <ul className={styles.list}>
-        {groups.map((group) => (
-          <li
-            key={group.id}
-            onClick={() => setSelectedGroup(group)}
-            className={styles.groupItem}
-          >
-            {group.name}
-            {String(user?.id) === String(group.ownerId) && (
-              <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setGroupToDelete(group);
-              }}
-              className={styles.deleteButton}
-            >
-              Usuń
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-
-      {selectedGroup && (
-        <GroupMembersPage
-          key={String(selectedGroup.id)}
-          group={selectedGroup}
-          onBack={() => setSelectedGroup(null)}
-        />
-      )}
-
-      <ConfirmModal
-        visible={Boolean(groupToDelete)}
-        title="Usuń grupę"
-        message="Czy na pewno chcesz usunąć tę grupę wraz z powiązanymi danymi?"
-        confirmLabel="Usuń"
-        onConfirm={handleDeleteGroup}
-        onCancel={() => setGroupToDelete(null)}
-      />
-    </div>
   );
 };
 
